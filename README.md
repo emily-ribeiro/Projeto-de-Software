@@ -62,7 +62,6 @@ Cliente → FastAPI Router → Depends(get_current_user) [valida JWT]
 
 ## Ambiente de Testes
 
-> ⚠️ Preencha esta seção após executar os testes reais com cada ferramenta.
 
 Ferramentas testadas (mínimo de duas combinações gratuitas):
 
@@ -101,8 +100,6 @@ Ferramentas testadas (mínimo de duas combinações gratuitas):
 
 ## Tabela Comparativa
 
-> ⚠️ Preencha com os dados reais coletados em `docs/log-sessoes.csv` após os testes.
-
 | Critério | Combinação A | Combinação B | Combinação C |
 |---|---|---|---|
 | Velocidade média por módulo | — | — | — |
@@ -115,10 +112,6 @@ Ferramentas testadas (mínimo de duas combinações gratuitas):
 | Contras | — | — | — |
 
 ## Conclusão
-
-> ⚠️ Escrever após consolidar os dados: qual ferramenta entregou o melhor custo-benefício
-> e experiência de desenvolvimento, com base nas métricas coletadas — não apenas em
-> impressão subjetiva.
 
 ## Como Rodar o Projeto
 
