@@ -1,0 +1,15 @@
+data,combinacao_ide_ia,modulo,tempo_gasto_min,tempo_estimado_sem_ia_min,sugestoes_aceitas,sugestoes_rejeitadas,bugs_introduzidos_pela_ia,testes_gerados_rodaram_de_primeira,testes_cobriram_casos_de_borda,qualidade_documentacao_1a5,facilidade_refatoracao_1a5,observacoes
+2026-09-01,Combinacao A (VS Code + Copilot),Modelagem (models.py e database.py),,,,,,,,,,"Exemplo: preencher com dados reais da sessao"
+2026-09-01,Combinacao A (VS Code + Copilot),Autenticacao JWT (auth.py + auth_router.py),,,,,,,,,,
+2026-09-01,Combinacao A (VS Code + Copilot),CRUD de tarefas (tasks.py),,,,,,,,,,
+2026-09-01,Combinacao A (VS Code + Copilot),Filtros e busca,,,,,,,,,,
+2026-09-01,Combinacao A (VS Code + Copilot),Geracao de testes,,,,,,,,,,
+2026-09-01,Combinacao A (VS Code + Copilot),Debug bug bcrypt/passlib,,,,,,,,,,
+2026-09-01,Combinacao A (VS Code + Copilot),Refatoracao e documentacao,,,,,,,,,,
+2026-09-02,Combinacao B (Cursor),Modelagem (models.py e database.py),,,,,,,,,,
+2026-09-02,Combinacao B (Cursor),Autenticacao JWT (auth.py + auth_router.py),,,,,,,,,,
+2026-09-02,Combinacao B (Cursor),CRUD de tarefas (tasks.py),,,,,,,,,,
+2026-09-02,Combinacao B (Cursor),Filtros e busca,,,,,,,,,,
+2026-09-02,Combinacao B (Cursor),Geracao de testes,,,,,,,,,,
+2026-09-02,Combinacao B (Cursor),Debug bug bcrypt/passlib,,,,,,,,,,
+2026-09-02,Combinacao B (Cursor),Refatoracao e documentacao,,,,,,,,,,
