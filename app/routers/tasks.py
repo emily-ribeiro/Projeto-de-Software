@@ -39,6 +39,7 @@ def create_task(
 
 @router.get("/", response_model=List[schemas.TaskOut])
 def list_tasks(
+    status: Optional[models.StatusEnum] = None,
     status_filter: Optional[models.StatusEnum] = None,
     priority: Optional[models.PriorityEnum] = None,
     tag: Optional[str] = None,
@@ -46,16 +47,19 @@ def list_tasks(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Lista apenas as tarefas pertencentes ao usuário autenticado, com suporte a filtros."""
+    """Lista apenas as tarefas pertencentes ao usuário autenticado, com suporte a filtros opcionais e combináveis."""
     query = db.query(models.Task).filter(models.Task.owner_id == current_user.id)
-    if status_filter:
-        query = query.filter(models.Task.status == status_filter)
+
+    target_status = status or status_filter
+    if target_status:
+        query = query.filter(models.Task.status == target_status)
     if priority:
         query = query.filter(models.Task.priority == priority)
     if tag:
         query = query.filter(models.Task.tag == tag)
     if search:
         query = query.filter(models.Task.title.ilike(f"%{search}%"))
+
     return query.order_by(models.Task.created_at.desc()).all()
 
 

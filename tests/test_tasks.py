@@ -77,3 +77,55 @@ def test_cannot_access_other_users_task(client, db_session):
 
     response = client.get(f"/tasks/{task_id}", headers=headers2)
     assert response.status_code == 403
+
+
+def test_filter_tasks_by_status_param(client, auth_headers):
+    client.post("/tasks/", json={"title": "Task 1", "status": "done"}, headers=auth_headers)
+    client.post("/tasks/", json={"title": "Task 2", "status": "pending"}, headers=auth_headers)
+
+    response = client.get("/tasks/?status=done", headers=auth_headers)
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Task 1"
+
+
+def test_filter_tasks_by_priority_tag_and_search(client, auth_headers):
+    client.post(
+        "/tasks/",
+        json={"title": "Comprar Leite", "priority": "high", "tag": "compras", "status": "pending"},
+        headers=auth_headers,
+    )
+    client.post(
+        "/tasks/",
+        json={"title": "Estudar Python", "priority": "high", "tag": "estudos", "status": "in_progress"},
+        headers=auth_headers,
+    )
+    client.post(
+        "/tasks/",
+        json={"title": "Comprar Pão", "priority": "low", "tag": "compras", "status": "done"},
+        headers=auth_headers,
+    )
+
+    # Test priority filter
+    res_priority = client.get("/tasks/?priority=high", headers=auth_headers)
+    assert res_priority.status_code == 200
+    assert len(res_priority.json()) == 2
+
+    # Test tag filter
+    res_tag = client.get("/tasks/?tag=compras", headers=auth_headers)
+    assert res_tag.status_code == 200
+    assert len(res_tag.json()) == 2
+
+    # Test search (case-insensitive partial)
+    res_search = client.get("/tasks/?search=comprar", headers=auth_headers)
+    assert res_search.status_code == 200
+    assert len(res_search.json()) == 2
+
+    # Test combined filters (priority=high + search=estudar)
+    res_combined = client.get("/tasks/?priority=high&search=estudar", headers=auth_headers)
+    assert res_combined.status_code == 200
+    data_combined = res_combined.json()
+    assert len(data_combined) == 1
+    assert data_combined[0]["title"] == "Estudar Python"
+
