@@ -10,12 +10,26 @@ from app.auth import get_current_user
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
-def _get_owned_task(task_id: int, db: Session, user: models.User) -> models.Task:
-    """Busca uma tarefa pelo ID e garante que ela pertence ao usuário logado."""
+def get_owned_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+) -> models.Task:
+    """
+    Dependência reutilizável do FastAPI que recupera uma tarefa pelo ID
+    e valida se ela pertence ao usuário atualmente autenticado.
+
+    Lança:
+        HTTPException 404: Se a tarefa não existir no banco.
+        HTTPException 403: Se a tarefa pertencer a outro usuário.
+    """
     task = db.query(models.Task).filter(models.Task.id == task_id).first()
     if not task:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
-    if task.owner_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found"
+        )
+    if task.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to access this task"
@@ -29,7 +43,17 @@ def create_task(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Cria uma nova tarefa associada ao usuário autenticado."""
+    """
+    Cria uma nova tarefa no sistema associada ao usuário autenticado.
+
+    Args:
+        task_in (TaskCreate): Dados da tarefa (título, descrição, prioridade, status, due_date, tag).
+        db (Session): Sessão ativa do banco de dados (injetada via get_db).
+        current_user (User): Usuário logado recuperado via token JWT (injetado via get_current_user).
+
+    Returns:
+        TaskOut: Objeto da tarefa criada com id, owner_id e created_at preenchidos.
+    """
     task = models.Task(**task_in.model_dump(), owner_id=current_user.id)
     db.add(task)
     db.commit()
@@ -47,7 +71,18 @@ def list_tasks(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Lista apenas as tarefas pertencentes ao usuário autenticado, com suporte a filtros opcionais e combináveis."""
+    """
+    Lista todas as tarefas pertencentes ao usuário autenticado.
+
+    Suporta parâmetros de busca e filtros combináveis:
+    - **status / status_filter**: Filtra por estado da tarefa (`pending`, `in_progress`, `done`).
+    - **priority**: Filtra por prioridade (`low`, `medium`, `high`).
+    - **tag**: Filtra por tag exata.
+    - **search**: Busca textual parcial no título (case-insensitive).
+
+    Returns:
+        List[TaskOut]: Lista de tarefas ordenadas da mais recente para a mais antiga.
+    """
     query = db.query(models.Task).filter(models.Task.owner_id == current_user.id)
 
     target_status = status or status_filter
@@ -64,24 +99,36 @@ def list_tasks(
 
 
 @router.get("/{task_id}", response_model=schemas.TaskOut)
-def get_task(
-    task_id: int,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
-):
-    """Retorna os detalhes de uma tarefa específica do usuário autenticado."""
-    return _get_owned_task(task_id, db, current_user)
+def get_task(task: models.Task = Depends(get_owned_task)):
+    """
+    Recupera os detalhes de uma tarefa específica pertencente ao usuário logado.
+
+    Args:
+        task (Task): Objeto da tarefa validado e injetado pela dependência get_owned_task.
+
+    Returns:
+        TaskOut: Dados completos da tarefa.
+    """
+    return task
 
 
 @router.put("/{task_id}", response_model=schemas.TaskOut)
 def update_task(
-    task_id: int,
     task_in: schemas.TaskUpdate,
+    task: models.Task = Depends(get_owned_task),
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
 ):
-    """Atualiza parcialmente os campos de uma tarefa existente."""
-    task = _get_owned_task(task_id, db, current_user)
+    """
+    Atualiza parcialmente os campos de uma tarefa existente pertencente ao usuário.
+
+    Args:
+        task_in (TaskUpdate): Campos a serem atualizados (apenas valores fornecidos serão alterados).
+        task (Task): Tarefa validada via dependência get_owned_task.
+        db (Session): Sessão do banco para persisitir as alterações.
+
+    Returns:
+        TaskOut: Objeto atualizado da tarefa.
+    """
     for field, value in task_in.model_dump(exclude_unset=True).items():
         setattr(task, field, value)
     db.commit()
@@ -91,12 +138,19 @@ def update_task(
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(
-    task_id: int,
+    task: models.Task = Depends(get_owned_task),
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
 ):
-    """Remove uma tarefa do usuário autenticado."""
-    task = _get_owned_task(task_id, db, current_user)
+    """
+    Remove uma tarefa existente pertencente ao usuário logado.
+
+    Args:
+        task (Task): Tarefa validada via dependência get_owned_task.
+        db (Session): Sessão do banco para executar a exclusão.
+
+    Returns:
+        None: Retorna status HTTP 204 No Content no sucesso.
+    """
     db.delete(task)
     db.commit()
     return None
