@@ -71,7 +71,7 @@ Ferramentas testadas (mínimo de duas combinações gratuitas):
 | B | Cursor | Modelo integrado (free tier) | Free |
 | C | Antigravity| Gemini | Free |
 
-Durante os testes, a Combinação B planejada inicialmente (Cursor free tier) esbarrou no limite de tokens do plano gratuito antes de completar o Módulo 1, impossibilitando a conclusão do teste nessa ferramenta. Além disso, constatou-se que o Gemini Code Assist para contas individuais foi descontinuado pelo Google em 18/06/2026, sendo substituído pela plataforma Antigravity. Diante disso, a Combinação C foi adicionado o [Antigravity+S], mantendo a mesma metodologia de testes.
+Durante os testes, a Combinação B planejada inicialmente (Cursor free tier) esbarrou no limite de tokens do plano gratuito antes de completar o Módulo 1, impossibilitando a conclusão do teste nessa ferramenta. Além disso, constatou-se que o Gemini Code Assist para contas individuais foi descontinuado pelo Google em 18/06/2026, sendo substituído pela plataforma Antigravity. Diante disso, a Combinação C foi adicionado o [Antigravity+Gemini], mantendo a mesma metodologia de testes.
 
 ## Metodologia
 
