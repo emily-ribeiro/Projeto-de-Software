@@ -35,6 +35,7 @@ def create_task(
 
 @router.get("/", response_model=List[schemas.TaskOut])
 def list_tasks(
+	status: Optional[models.StatusEnum] = None,
 	status_filter: Optional[models.StatusEnum] = None,
 	priority: Optional[models.PriorityEnum] = None,
 	tag: Optional[str] = None,
@@ -43,8 +44,9 @@ def list_tasks(
 	current_user: models.User = Depends(get_current_user),
 ):
 	query = db.query(models.Task).filter(models.Task.owner_id == current_user.id)
-	if status_filter:
-		query = query.filter(models.Task.status == status_filter)
+	selected_status = status or status_filter
+	if selected_status:
+		query = query.filter(models.Task.status == selected_status)
 	if priority:
 		query = query.filter(models.Task.priority == priority)
 	if tag:
