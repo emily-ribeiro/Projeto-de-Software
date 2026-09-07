@@ -110,8 +110,7 @@ Durante os testes, a Combinação B planejada inicialmente (Cursor free tier) es
 | Qualidade dos testes gerados | — | — | — |
 | Facilidade de refatoração | — | — | — |
 | Qualidade da documentação gerada | — | — | — |
-| Prós | — | — | — |
-| Contras | — | — | — |
+
 
 ## Conclusão
 Com base nos testes realizados, não existe uma combinação IDE + IA objetivamente "melhor" em todos os aspectos — a escolha ideal depende do perfil e da afinidade do desenvolvedor com cada ambiente, além do estágio do projeto. Ainda assim, foi possível identificar diferenças relevantes de custo-benefício entre as ferramentas testadas:
