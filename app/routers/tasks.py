@@ -26,6 +26,7 @@ def create_task(
 	db: Session = Depends(get_db),
 	current_user: models.User = Depends(get_current_user),
 ):
+	"""Cria uma tarefa pertencente ao usuário autenticado."""
 	task = models.Task(**task_in.model_dump(), owner_id=current_user.id)
 	db.add(task)
 	db.commit()
@@ -43,6 +44,7 @@ def list_tasks(
 	db: Session = Depends(get_db),
 	current_user: models.User = Depends(get_current_user),
 ):
+	"""Lista as tarefas do usuário autenticado aplicando filtros opcionais."""
 	query = db.query(models.Task).filter(models.Task.owner_id == current_user.id)
 	selected_status = status or status_filter
 	if selected_status:
@@ -62,6 +64,7 @@ def get_task(
 	db: Session = Depends(get_db),
 	current_user: models.User = Depends(get_current_user),
 ):
+	"""Retorna uma tarefa do usuário autenticado ou falha se ela não existir ou pertencer a outro usuário."""
 	return _get_owned_task(task_id, db, current_user)
 
 
@@ -72,6 +75,7 @@ def update_task(
 	db: Session = Depends(get_db),
 	current_user: models.User = Depends(get_current_user),
 ):
+	"""Atualiza parcialmente uma tarefa pertencente ao usuário autenticado."""
 	task = _get_owned_task(task_id, db, current_user)
 	for field, value in task_in.model_dump(exclude_unset=True).items():
 		setattr(task, field, value)
@@ -86,6 +90,7 @@ def delete_task(
 	db: Session = Depends(get_db),
 	current_user: models.User = Depends(get_current_user),
 ):
+	"""Remove uma tarefa pertencente ao usuário autenticado."""
 	task = _get_owned_task(task_id, db, current_user)
 	db.delete(task)
 	db.commit()
