@@ -12,7 +12,10 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     existing = db.query(models.User).filter(models.User.username == user_in.username).first()
     if existing:
-        raise HTTPException(status_code=400, detail="Username already registered")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already registered"
+        )
 
     user = models.User(
         username=user_in.username,
