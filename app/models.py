@@ -1,45 +1,52 @@
-import enum
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey, Text
-from sqlalchemy.orm import relationship
+from enum import Enum
+
+from sqlalchemy import DateTime, Enum as SQLEnum, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
 
-class PriorityEnum(str, enum.Enum):
-    low = "low"
-    medium = "medium"
-    high = "high"
+class StatusEnum(str, Enum):
+	pending = "pending"
+	in_progress = "in_progress"
+	done = "done"
 
 
-class StatusEnum(str, enum.Enum):
-    pending = "pending"
-    in_progress = "in_progress"
-    done = "done"
+class PriorityEnum(str, Enum):
+	low = "low"
+	medium = "medium"
+	high = "high"
 
 
 class User(Base):
-    __tablename__ = "users"
+	__tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+	id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+	username: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
+	hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+	created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
-    tasks = relationship("Task", back_populates="owner", cascade="all, delete-orphan")
+	tasks: Mapped[list["Task"]] = relationship(
+		"Task", back_populates="owner", cascade="all, delete-orphan"
+	)
 
 
 class Task(Base):
-    __tablename__ = "tasks"
+	__tablename__ = "tasks"
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False, index=True)
-    description = Column(Text, nullable=True)
-    status = Column(Enum(StatusEnum), default=StatusEnum.pending, nullable=False)
-    priority = Column(Enum(PriorityEnum), default=PriorityEnum.medium, nullable=False)
-    due_date = Column(DateTime, nullable=True)
-    tag = Column(String, nullable=True, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+	id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+	title: Mapped[str] = mapped_column(String(255), nullable=False)
+	description: Mapped[str | None] = mapped_column(Text, nullable=True)
+	status: Mapped[StatusEnum] = mapped_column(
+		SQLEnum(StatusEnum), default=StatusEnum.pending, nullable=False
+	)
+	priority: Mapped[PriorityEnum] = mapped_column(
+		SQLEnum(PriorityEnum), default=PriorityEnum.medium, nullable=False
+	)
+	due_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+	tag: Mapped[str | None] = mapped_column(String(100), nullable=True)
+	created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+	owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
 
-    owner = relationship("User", back_populates="tasks")
+	owner: Mapped[User] = relationship("User", back_populates="tasks")
