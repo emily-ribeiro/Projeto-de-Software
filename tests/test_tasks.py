@@ -15,9 +15,18 @@ def test_list_tasks_only_own(client, auth_headers):
     client.post("/tasks/", json={"title": "Tarefa 1"}, headers=auth_headers)
     client.post("/tasks/", json={"title": "Tarefa 2"}, headers=auth_headers)
 
+    client.post("/auth/register", json={"username": "other", "password": "pass123456"})
+    other_login = client.post(
+        "/auth/login",
+        data={"username": "other", "password": "pass123456"},
+    )
+    other_headers = {"Authorization": f"Bearer {other_login.json()['access_token']}"}
+    client.post("/tasks/", json={"title": "Tarefa de outro"}, headers=other_headers)
+
     response = client.get("/tasks/", headers=auth_headers)
     assert response.status_code == 200
     assert len(response.json()) == 2
+    assert all(task["title"] != "Tarefa de outro" for task in response.json())
 
 
 def test_get_task_not_found(client, auth_headers):
@@ -55,7 +64,7 @@ def test_filter_tasks_by_status(client, auth_headers):
     client.post("/tasks/", json={"title": "A", "status": "done"}, headers=auth_headers)
     client.post("/tasks/", json={"title": "B", "status": "pending"}, headers=auth_headers)
 
-    response = client.get("/tasks/?status_filter=done", headers=auth_headers)
+    response = client.get("/tasks/?status=done", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
