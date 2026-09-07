@@ -85,8 +85,6 @@ Durante os testes, a Combinação B planejada inicialmente (Cursor free tier) es
 4. Ao final de cada módulo, foi solicitado à IA: (a) gerar testes unitários/integração,
    (b) explicar o código gerado, (c) sugerir uma refatoração — e o resultado foi avaliado
    segundo os critérios abaixo.
-5. Um mesmo bug real (incompatibilidade `bcrypt`/`passlib`, documentado neste projeto) foi
-   apresentado a cada ferramenta para comparar a capacidade de diagnóstico e correção.
 
 ## Critérios de Avaliação
 
