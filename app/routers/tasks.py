@@ -11,11 +11,15 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
 def _get_owned_task(task_id: int, db: Session, user: models.User) -> models.Task:
+    """Busca uma tarefa pelo ID e garante que ela pertence ao usuário logado."""
     task = db.query(models.Task).filter(models.Task.id == task_id).first()
     if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
     if task.owner_id != user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this task")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this task"
+        )
     return task
 
 
@@ -25,6 +29,7 @@ def create_task(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    """Cria uma nova tarefa associada ao usuário autenticado."""
     task = models.Task(**task_in.model_dump(), owner_id=current_user.id)
     db.add(task)
     db.commit()
@@ -41,6 +46,7 @@ def list_tasks(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    """Lista apenas as tarefas pertencentes ao usuário autenticado, com suporte a filtros."""
     query = db.query(models.Task).filter(models.Task.owner_id == current_user.id)
     if status_filter:
         query = query.filter(models.Task.status == status_filter)
@@ -59,6 +65,7 @@ def get_task(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    """Retorna os detalhes de uma tarefa específica do usuário autenticado."""
     return _get_owned_task(task_id, db, current_user)
 
 
@@ -69,6 +76,7 @@ def update_task(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    """Atualiza parcialmente os campos de uma tarefa existente."""
     task = _get_owned_task(task_id, db, current_user)
     for field, value in task_in.model_dump(exclude_unset=True).items():
         setattr(task, field, value)
@@ -83,6 +91,7 @@ def delete_task(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    """Remove uma tarefa do usuário autenticado."""
     task = _get_owned_task(task_id, db, current_user)
     db.delete(task)
     db.commit()
