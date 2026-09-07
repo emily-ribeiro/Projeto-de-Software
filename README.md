@@ -114,11 +114,22 @@ Durante os testes, a Combinação B planejada inicialmente (Cursor free tier) es
 | Contras | — | — | — |
 
 ## Conclusão
+Com base nos testes realizados, não existe uma combinação IDE + IA objetivamente "melhor" em todos os aspectos — a escolha ideal depende do perfil e da afinidade do desenvolvedor com cada ambiente, além do estágio do projeto. Ainda assim, foi possível identificar diferenças relevantes de custo-benefício entre as ferramentas testadas:
+
+GitHub Copilot (VS Code) entregou código funcional e com boas práticas modernas (ex.: uso de datetime com timezone e tipagem SQLAlchemy 2.0 acima do baseline), mas cometeu um deslize de segurança ao fixar a SECRET_KEY diretamente no código em vez de usar variável de ambiente — um lembrete de que sugestões da IA ainda exigem revisão crítica, mesmo quando o código "funciona".
+
+Cursor (free tier) esbarrou no limite de tokens do plano gratuito antes de concluir o primeiro módulo, o que na prática inviabilizou seu uso contínuo sem custo — um fator de custo-benefício tão relevante quanto a qualidade técnica das sugestões.
+
+
+Gemini Code Assist no VS Code, inicialmente cogitado como terceira combinação, foi descontinuado pelo Google em 18/06/2026 para contas individuais, substituído pela plataforma Antigravity, adotada como Combinação C neste estudo.
+Antigravity, por ser uma plataforma "agent-first", demonstrou maior autonomia para conduzir o fluxo completo de geração, execução de testes e correção iterativa sem intervenção manual constante — vantagem clara quando o objetivo é delegar tarefas maiores à IA. Em contrapartida, essa autonomia reduziu o controle fino sobre quando e como cada etapa era executada (ex.: dificuldade de isolar o tempo de geração do tempo de validação, já que o agente encadeia as duas automaticamente).
+
+Ferramentas de extensão dentro do próprio VS Code (Copilot, Continue.dev) oferecem mais controle granular e um ecossistema maior de opções e modelos configuráveis, o que favorece quem já tem um ambiente de desenvolvimento consolidado e não quer trocar de IDE. Já plataformas "tudo-em-um" como Antigravity favorecem quem prioriza produtividade em modo agente, aceitando abrir mão de parte do controle manual do processo.
 
 ## Como Rodar o Projeto
 
 ```bash
-# 1. Criar ambiente virtual (opcional, mas recomendado)
+# 1. Criar ambiente virtual 
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
@@ -135,10 +146,4 @@ uvicorn app.main:app --reload
 pytest -v
 ```
 
-### Nota técnica: bug real encontrado
 
-Durante o desenvolvimento, `passlib[bcrypt]==1.7.4` combinado com a versão mais recente
-do pacote `bcrypt` (5.x) quebra com o erro
-`ValueError: password cannot be longer than 72 bytes`, causado por uma mudança de API
-não compatível entre as bibliotecas. Correção: fixar `bcrypt==4.0.1` no `requirements.txt`.
-Isso foi usado como caso de teste para avaliar a capacidade de diagnóstico das IAs.
